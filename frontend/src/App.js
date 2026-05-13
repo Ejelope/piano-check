@@ -114,30 +114,37 @@ function App() {
     return rows;
   };
 
-  const handleBlur = async (row, field, value) => {
-    if (!value) return;
-    if (row) {
-      if (value === String(row[field] || '')) return;
-      await update(row.id, { ...row, [field]: value });
-    } else {
-      await create({
-        noteNumber: currentNote,
-        practiceDate: field === 'practiceDate' ? value : null,
-        songName: field === 'songName' ? value : null,
-        count: 0
-      });
-    }
-    fetchPractices();
-  };
+const handleBlur = async (row, field, value) => {
+  if (!value) return;
+  if (row) {
+    if (value === String(row[field] || '')) return;
+    // 화면 즉시 업데이트
+    setPractices(prev => prev.map(p => p.id === row.id ? { ...p, [field]: value } : p));
+    update(row.id, { ...row, [field]: value }); // 백그라운드 저장
+  } else {
+    const newRow = {
+      noteNumber: currentNote,
+      practiceDate: field === 'practiceDate' ? value : null,
+      songName: field === 'songName' ? value : null,
+      count: 0
+    };
+    const saved = await create(newRow);
+    setPractices(prev => [...prev, saved]);
+  }
+};
 
   const handleAppleClick = async (row, rowIndex, idx) => {
+    const newCount = row ? (idx < row.count ? idx : idx + 1) : idx + 1;
+
+    // 화면 즉시 업데이트
     if (row) {
-      const newCount = idx < row.count ? idx : idx + 1;
-      await update(row.id, { ...row, count: newCount });
+      setPractices(prev => prev.map(p => p.id === row.id ? { ...p, count: newCount } : p));
+      update(row.id, { ...row, count: newCount }); // 백그라운드 저장
     } else {
-      await create({ noteNumber: currentNote, practiceDate: null, songName: null, count: idx + 1 });
+      const newRow = { noteNumber: currentNote, practiceDate: null, songName: null, count: newCount };
+      const saved = await create(newRow);
+      setPractices(prev => [...prev, saved]);
     }
-    fetchPractices();
   };
 
   const handleNextNote = () => {
