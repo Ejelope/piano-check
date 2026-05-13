@@ -152,13 +152,6 @@ function App() {
 
   const rows = currentRows();
 
-  // 테이블 크레파스 선 좌표 계산
-  const TABLE_TOP = 0;
-  const ROW_H = 48;
-  const COL1 = 80;   // 날짜 끝
-  const COL2 = 200;  // 곡명 끝
-  const TW = 640;    // 테이블 전체 너비
-
   return (
     <div className="notebook">
       <div className="notebook-title">🎸 연습 기록장</div>
