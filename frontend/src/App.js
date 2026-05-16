@@ -115,13 +115,8 @@ function App() {
   };
 
 const handleBlur = async (row, field, value) => {
-  if (!value) return;
-  if (row) {
-    if (value === String(row[field] || '')) return;
-    // 화면 즉시 업데이트
-    setPractices(prev => prev.map(p => p.id === row.id ? { ...p, [field]: value } : p));
-    update(row.id, { ...row, [field]: value }); // 백그라운드 저장
-  } else {
+  if (!row) {
+    if (!value) return;
     const newRow = {
       noteNumber: currentNote,
       practiceDate: field === 'practiceDate' ? value : null,
@@ -130,7 +125,15 @@ const handleBlur = async (row, field, value) => {
     };
     const saved = await create(newRow);
     setPractices(prev => [...prev, saved]);
+    return;
   }
+
+  if (value === String(row[field] || '')) return; // 변경 없으면 스킵
+
+  // 빈값이면 null로 업데이트
+  const finalValue = value || null;
+  setPractices(prev => prev.map(p => p.id === row.id ? { ...p, [field]: finalValue } : p));
+  update(row.id, { ...row, [field]: finalValue });
 };
 
   const handleAppleClick = async (row, rowIndex, idx) => {
